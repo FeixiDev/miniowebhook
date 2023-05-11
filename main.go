@@ -17,26 +17,6 @@ const (
 	WebhookURL       = "https://10.203.1.23:30278/audit/webhook/event"
 )
 
-//	type TypeMeta struct {
-//		// +optional
-//		APIVersion string `json:"apiVersion,omitempty" yaml:"apiVersion,omitempty" protobuf:"bytes,1,opt,name=apiVersion"`
-//		// +optional
-//		Kind string `json:"kind,omitempty" yaml:"kind,omitempty" protobuf:"bytes,2,opt,name=kind"`
-//	}
-//
-//	type Unknown struct {
-//		TypeMeta `json:",inline" protobuf:"bytes,1,opt,name=typeMeta"`
-//		// Raw will hold the complete serialized object which couldn't be matched
-//		// with a registered type. Most likely, nothing should be done with this
-//		// except for passing it through the system.
-//		Raw []byte `protobuf:"bytes,2,opt,name=raw"`
-//		// ContentEncoding is encoding used to encode 'Raw' data.
-//		// Unspecified means no encoding.
-//		ContentEncoding string `protobuf:"bytes,3,opt,name=contentEncoding"`
-//		// ContentType  is serialization method used to serialize 'Raw'.
-//		// Unspecified means ContentTypeJSON.
-//		ContentType string `protobuf:"bytes,4,opt,name=contentType"`
-//	}
 type Backend struct {
 	url              string
 	senderCh         chan interface{}
@@ -46,49 +26,9 @@ type Backend struct {
 	stopCh           <-chan struct{}
 }
 
-//type MicroTime struct {
-//	time.Time `protobuf:"-"`
-//}
-//
-//type Events struct {
-//	TypeMeta
-//
-//	// AuditLevel at which event was generated
-//	Level string
-//
-//	// Unique audit ID, generated for each request.
-//	AuditID string
-//	// Stage of the request handling when this event instance was generated.
-//	Stage string
-//
-//	// RequestURI is the request URI as sent by the client to a server.
-//	RequestURI string
-//	// Verb is the kubernetes verb associated with the request.
-//	// For non-resource requests, this is the lower-cased HTTP method.
-//	Verb string
-//	// Authenticated user information.
-//	User string
-//
-//	ImpersonatedUser map[string]string
-//
-//	SourceIPs []string
-//
-//	UserAgent string
-//
-//	ObjectRef *ObjectReference
-//
-//	ResponseStatus string
-//
-//	RequestObject Unknown
-//
-//	ResponseObject Unknown
-//
-//	RequestReceivedTimestamp MicroTime
-//
-//	StageTimestamp MicroTime
-//
-//	Annotations map[string]string
-//}
+type MicroTime struct {
+	time.Time `protobuf:"-"`
+}
 
 type Event struct {
 	Devops                   string
@@ -108,8 +48,8 @@ type Event struct {
 	ResponseStatus           ResponseStatus
 	RequestObject            interface{}
 	ResponseObject           interface{}
-	RequestReceivedTimestamp string
-	StageTimestamp           string
+	RequestReceivedTimestamp MicroTime
+	StageTimestamp           MicroTime
 	Annotations              interface{}
 }
 
@@ -138,26 +78,8 @@ type EventList struct {
 	Items []Event
 }
 
-type ObjectReference struct {
-	// +optional
-	Resource string
-	// +optional
-	Namespace string
-	// +optional
-	Name string
-	// +optional
-	UID string
-	// APIGroup is the name of the API group that contains the referred object.
-	// The empty string represents the core API group.
-	// +optional
-	APIGroup string
-	// APIVersion is the version of the API group that contains the referred object.
-	// +optional
-	APIVersion string
-	// +optional
-	ResourceVersion string
-	// +optional
-	Subresource string
+func NowMicro() MicroTime {
+	return MicroTime{time.Now()}
 }
 
 func NewBackend(stopCh <-chan struct{}) *Backend {
@@ -267,7 +189,7 @@ func main() {
 		Cluster:    "Cluster",
 		Message:    "",
 		Level:      "Metadata",
-		AuditID:    "bmc2077-fc3b-46a5-2434-89066c3ad435",
+		AuditID:    "bmc2077-fc3b-46a5-2434-89066c3ad333",
 		Stage:      "ResponseComplete",
 		RequestURI: "",
 		Verb:       "login",
@@ -296,8 +218,8 @@ func main() {
 
 		RequestObject:            nil,
 		ResponseObject:           nil,
-		RequestReceivedTimestamp: "2023-05-11T05:28:38.988705Z",
-		StageTimestamp:           "2023-05-11T05:28:38.679121Z",
+		RequestReceivedTimestamp: NowMicro(),
+		StageTimestamp:           NowMicro(),
 		Annotations:              nil,
 	}
 
