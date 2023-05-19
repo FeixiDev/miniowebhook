@@ -185,7 +185,7 @@ func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
 	return bs, err
 }
 
-func (b *Backend) processJSONData(jsonData []byte) (Event, error) {
+func (b *Backend) ProcessJSONData(jsonData []byte) (Event, error) {
 	var data map[string]interface{}
 	err := json.Unmarshal(jsonData, &data)
 	if err != nil {
@@ -239,6 +239,5 @@ func (b *Backend) processJSONData(jsonData []byte) (Event, error) {
 		// 使用 uuid 包生成 AuditID
 		AuditID: uuid.New().String(),
 	}
-	fmt.Println(event)
 	return event, nil
 }
