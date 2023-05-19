@@ -1,13 +1,13 @@
 package main
 
 import (
-	"MinIO_webhook/k8s.io/klog"
 	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"k8s.io/klog"
 	"net/http"
 	"time"
 )
@@ -239,6 +239,6 @@ func (b *Backend) processJSONData(jsonData []byte) (Event, error) {
 		// 使用 uuid 包生成 AuditID
 		AuditID: uuid.New().String(),
 	}
-
+	fmt.Println(event)
 	return event, nil
 }
