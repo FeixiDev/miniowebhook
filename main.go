@@ -1,234 +1,77 @@
 package main
 
 import (
-	"Gotest/MinIO_webhook/k8s.io/klog"
-	"bytes"
-	"context"
-	"crypto/tls"
 	"encoding/json"
-	"fmt"
+	"flag"
+	"io/ioutil"
+	"log"
 	"net/http"
-	"time"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+
+	"github.com/minio/pkg/env"
 )
 
-const (
-	GetSenderTimeout = time.Second
-	SendTimeout      = time.Second * 3
-	WebhookURL       = "https://10.203.1.23:30278/audit/webhook/event"
+var (
+	logFile   string
+	address   string
+	authToken = env.Get("WEBHOOK_AUTH_TOKEN", "")
 )
 
-type Backend struct {
-	url              string
-	senderCh         chan interface{}
-	client           http.Client
-	sendTimeout      time.Duration
-	getSenderTimeout time.Duration
-	stopCh           <-chan struct{}
-}
-
-type MicroTime struct {
-	time.Time `protobuf:"-"`
-}
-
-type Event struct {
-	Devops                   string
-	Workspace                string
-	Cluster                  string
-	Message                  string
-	Level                    string
-	AuditID                  string
-	Stage                    string
-	RequestURI               string
-	Verb                     string
-	User                     User
-	ImpersonatedUser         interface{}
-	SourceIPs                []string
-	UserAgent                string
-	ObjectRef                ObjectRef
-	ResponseStatus           ResponseStatus
-	RequestObject            interface{}
-	ResponseObject           interface{}
-	RequestReceivedTimestamp MicroTime
-	StageTimestamp           MicroTime
-	Annotations              interface{}
-}
-
-type User struct {
-	username string
-	groups   []string
-}
-
-type ObjectRef struct {
-	Resource        string
-	Namespace       string
-	Name            string
-	UID             string
-	APIGroup        string
-	APIVersion      string
-	ResourceVersion string
-	Subresource     string
-}
-
-type ResponseStatus struct {
-	Code     int
-	Metadata map[string]interface{}
-}
-
-type EventList struct {
-	Items []Event
-}
-
-func NowMicro() MicroTime {
-	return MicroTime{time.Now()}
-}
-
-func NewBackend(stopCh <-chan struct{}) *Backend {
-
-	b := Backend{
-		url:              WebhookURL,
-		getSenderTimeout: GetSenderTimeout,
-		sendTimeout:      SendTimeout,
-		stopCh:           stopCh,
-	}
-	b.senderCh = make(chan interface{}, 100)
-
-	b.client = http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
-		Timeout: b.sendTimeout,
-	}
-
-	fmt.Println("ended NewBackend.......")
-	go b.worker()
-
-	return &b
-}
-
-func (b *Backend) worker() {
-	fmt.Println("start b worker.......")
-
-	for {
-		events := EventList{}
-
-		go b.sendEvents(events)
-	}
-}
-
-func (b *Backend) sendEvents(events EventList) {
-
-	ctx, cancel := context.WithTimeout(context.Background(), b.sendTimeout)
-	defer cancel()
-
-	stopCh := make(chan struct{})
-
-	send := func() {
-		ctx, cancel := context.WithTimeout(context.Background(), b.getSenderTimeout)
-		defer cancel()
-
-		select {
-		case <-ctx.Done():
-			klog.Error("Get auditing event sender timeout")
-			return
-		case b.senderCh <- struct{}{}:
-		}
-
-		start := time.Now()
-		defer func() {
-			stopCh <- struct{}{}
-			klog.V(8).Infof("send %d auditing logs used %d", len(events.Items), time.Since(start).Milliseconds())
-		}()
-
-		bs, err := b.eventToBytes(events)
-		if err != nil {
-			klog.Errorf("json marshal error, %s", err)
-			return
-		}
-
-		klog.V(8).Infof("%s", string(bs))
-
-		response, err := b.client.Post(b.url, "application/json", bytes.NewBuffer(bs))
-		if err != nil {
-			klog.Errorf("send audit events error, %s", err)
-			return
-		}
-		fmt.Println("finish")
-		defer response.Body.Close()
-
-		if response.StatusCode != http.StatusOK {
-			klog.Errorf("send audit events error[%d]", response.StatusCode)
-			return
-		}
-	}
-
-	go send()
-
-	defer func() {
-		<-b.senderCh
-	}()
-
-	select {
-	case <-ctx.Done():
-		klog.Error("send audit events timeout")
-	case <-stopCh:
-	}
-}
-
-func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
-
-	bs, err := json.Marshal(event)
-	return bs, err
+func processJSONData(jsonData map[string]interface{}) {
+	// Your logic to process the JSON data goes here
 }
 
 func main() {
-	myEvent := Event{
-		Devops:     "DevOps",
-		Workspace:  "Workspace",
-		Cluster:    "Cluster",
-		Message:    "",
-		Level:      "Metadata",
-		AuditID:    "bmc2077-fc3b-46a5-2434-89066c3ad333",
-		Stage:      "ResponseComplete",
-		RequestURI: "",
-		Verb:       "login",
-		User: User{
-			username: "admin",
+	flag.StringVar(&logFile, "log-file", "", "path to the file where webhook will log incoming events")
+	flag.StringVar(&address, "address", ":8080", "bind to a specific ADDRESS:PORT, ADDRESS can be an IP or hostname")
 
-			groups: []string{"system:authenticated"},
-		},
-		ImpersonatedUser: nil,
-		SourceIPs:        []string{"10.233.103.145"},
-		UserAgent:        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-		ObjectRef: ObjectRef{
-			Resource:        "bmc",
-			Namespace:       "",
-			Name:            "web",
-			UID:             "",
-			APIGroup:        "",
-			APIVersion:      "",
-			ResourceVersion: "",
-			Subresource:     "",
-		},
-		ResponseStatus: ResponseStatus{
-			Code:     200,
-			Metadata: make(map[string]interface{}),
-		},
+	flag.Parse()
 
-		RequestObject:            nil,
-		ResponseObject:           nil,
-		RequestReceivedTimestamp: NowMicro(),
-		StageTimestamp:           NowMicro(),
-		Annotations:              nil,
+	var mu sync.Mutex
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGHUP)
+
+	go func() {
+		for _ = range sigs {
+			mu.Lock()
+			mu.Unlock()
+		}
+	}()
+
+	err := http.ListenAndServe(address, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if authToken != "" {
+			if authToken != r.Header.Get("Authorization") {
+				http.Error(w, "authorization header missing", http.StatusBadRequest)
+				return
+			}
+		}
+		switch r.Method {
+		case http.MethodPost:
+			mu.Lock()
+			data, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				mu.Unlock()
+				return
+			}
+
+			var jsonData map[string]interface{}
+			err = json.Unmarshal(data, &jsonData)
+			if err != nil {
+				mu.Unlock()
+				return
+			}
+
+			processJSONData(jsonData)
+
+			mu.Unlock()
+		default:
+		}
+	}))
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	myEventList := EventList{
-		Items: []Event{myEvent},
-	}
-
-	stopCh := make(chan struct{})
-	backend := NewBackend(stopCh)
-
-	backend.sendEvents(myEventList)
 }
