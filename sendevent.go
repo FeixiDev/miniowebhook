@@ -192,7 +192,12 @@ func ProcessJSONData(jsonData []byte) (Event, error) {
 		return Event{}, err
 	}
 
-	name, ok := data["name"].(string)
+	apiData, ok := data["api"].(map[string]interface{})
+	if !ok {
+		return Event{}, fmt.Errorf("api key not found or not a map[string]interface{}")
+	}
+
+	name, ok := apiData["name"].(string)
 	if !ok {
 		return Event{}, fmt.Errorf("name key not found or not a string")
 	}

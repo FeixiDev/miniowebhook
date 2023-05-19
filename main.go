@@ -84,7 +84,6 @@ func main() {
 			}
 
 			processJSONData(jsonData)
-			fmt.Println(jsonData)
 
 			mu.Unlock()
 		default:
