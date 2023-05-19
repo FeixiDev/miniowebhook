@@ -185,7 +185,7 @@ func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
 	return bs, err
 }
 
-func (b *Backend) ProcessJSONData(jsonData []byte) (Event, error) {
+func ProcessJSONData(jsonData []byte) (Event, error) {
 	var data map[string]interface{}
 	err := json.Unmarshal(jsonData, &data)
 	if err != nil {

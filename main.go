@@ -30,10 +30,9 @@ func processJSONData(jsonData map[string]interface{}) {
 	}
 
 	// Create a Backend instance
-	backend := NewBackend(make(chan struct{}))
 
 	// Call ProcessJSONData function from sendevent.go
-	event, err := backend.ProcessJSONData(data)
+	event, err := ProcessJSONData(data)
 	if err != nil {
 		log.Println("Error processing JSON data:", err)
 		return
