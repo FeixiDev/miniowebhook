@@ -179,6 +179,11 @@ func (b *Backend) sendEvents(events EventList) {
 	}
 }
 
+func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
+	bs, err := json.Marshal(event)
+	return bs, err
+}
+
 func ProcessJSONData(jsonData []byte) (*Event, error) {
 	var data map[string]interface{}
 	err := json.Unmarshal(jsonData, &data)
