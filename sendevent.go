@@ -179,51 +179,56 @@ func (b *Backend) sendEvents(events EventList) {
 	}
 }
 
-func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
-
-	bs, err := json.Marshal(event)
-	return bs, err
-}
-
-func ProcessJSONData(jsonData []byte) (Event, error) {
+func ProcessJSONData(jsonData []byte) (*Event, error) {
 	var data map[string]interface{}
 	err := json.Unmarshal(jsonData, &data)
 	if err != nil {
-		return Event{}, err
+		return nil, err
 	}
 
 	apiData, ok := data["api"].(map[string]interface{})
 	if !ok {
-		return Event{}, fmt.Errorf("api key not found or not a map[string]interface{}")
+		return nil, fmt.Errorf("api key not found or not a map[string]interface{}")
 	}
 
 	name, ok := apiData["name"].(string)
 	if !ok {
-		return Event{}, fmt.Errorf("name key not found or not a string")
+		return nil, fmt.Errorf("name key not found or not a string")
 	}
 
 	version, ok := data["version"].(string)
 	if !ok {
-		return Event{}, fmt.Errorf("version key not found or not a string")
+		return nil, fmt.Errorf("version key not found or not a string")
 	}
 
 	timeValue, ok := data["time"].(string)
 	if !ok {
-		return Event{}, fmt.Errorf("time key not found or not a string")
+		return nil, fmt.Errorf("time key not found or not a string")
 	}
 
 	parentUser, ok := data["parentUser"].(string)
 	if !ok {
-		return Event{}, fmt.Errorf("parentUser key not found or not a string")
+		return nil, fmt.Errorf("parentUser key not found or not a string")
 	}
 
-	// 解析 timeValue 为 time.Time 类型的值
 	parsedTime, err := time.Parse(time.RFC3339, timeValue)
 	if err != nil {
-		return Event{}, fmt.Errorf("failed to parse time: %v", err)
+		return nil, fmt.Errorf("failed to parse time: %v", err)
 	}
 
-	// 使用指定的值创建一个新的 Event
+	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
+	isValidName := false
+	for _, validName := range validNames {
+		if name == validName {
+			isValidName = true
+			break
+		}
+	}
+
+	if !isValidName {
+		return nil, nil // 当 name 不是有效值时，返回 nil 而不是错误
+	}
+
 	event := Event{
 		ObjectRef: ObjectRef{
 			Name:       name,
@@ -234,15 +239,13 @@ func ProcessJSONData(jsonData []byte) (Event, error) {
 		User: User{
 			username: parentUser,
 		},
-		// 为 status 和 Resource 设置自定义值
 		ResponseStatus: ResponseStatus{
 			Code:     200,
 			Metadata: make(map[string]interface{}),
 			reason:   "",
 			status:   "INFO",
 		},
-		// 使用 uuid 包生成 AuditID
 		AuditID: uuid.New().String(),
 	}
-	return event, nil
+	return &event, nil
 }
