@@ -49,8 +49,8 @@ type Event struct {
 	ResponseStatus           ResponseStatus
 	RequestObject            interface{}
 	ResponseObject           interface{}
-	RequestReceivedTimestamp MicroTime
-	StageTimestamp           MicroTime
+	RequestReceivedTimestamp string
+	StageTimestamp           string
 	Annotations              interface{}
 }
 
@@ -206,20 +206,20 @@ func ProcessJSONData(jsonData []byte) (*Event, error) {
 		return nil, fmt.Errorf("version key not found or not a string")
 	}
 
-	timeValue, ok := data["time"].(string)
-	if !ok {
-		return nil, fmt.Errorf("time key not found or not a string")
-	}
+	//timeValue, ok := data["time"].(string)
+	//if !ok {
+	//	return nil, fmt.Errorf("time key not found or not a string")
+	//}
 
 	parentUser, ok := data["parentUser"].(string)
 	if !ok {
 		return nil, fmt.Errorf("parentUser key not found or not a string")
 	}
 
-	parsedTime, err := time.Parse(time.RFC3339, timeValue)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse time: %v", err)
-	}
+	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to parse time: %v", err)
+	//}
 
 	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
 	isValidName := false
@@ -235,14 +235,29 @@ func ProcessJSONData(jsonData []byte) (*Event, error) {
 	}
 
 	event := Event{
+		Devops:     "",
+		Workspace:  "",
+		Cluster:    "",
+		Message:    "",
+		Level:      "",
+		Stage:      "",
+		RequestURI: "",
+		Verb:       "",
+		SourceIPs:  []string{"10.233.103.183"},
 		ObjectRef: ObjectRef{
-			Name:       name,
-			APIVersion: version,
+			Name:            name,
+			APIVersion:      version,
+			UID:             "",
+			APIGroup:        "",
+			Namespace:       "",
+			ResourceVersion: "",
+			Subresource:     "",
 		},
-		RequestReceivedTimestamp: MicroTime{parsedTime},
-		StageTimestamp:           MicroTime{parsedTime},
+		RequestReceivedTimestamp: "2023-05-21T16:32:47.394877Z",
+		StageTimestamp:           "2023-05-21T16:32:47.394877Z",
 		User: User{
 			username: parentUser,
+			groups:   []string{"system:authenticated"},
 		},
 		ResponseStatus: ResponseStatus{
 			Code:     200,
@@ -250,7 +265,8 @@ func ProcessJSONData(jsonData []byte) (*Event, error) {
 			reason:   "",
 			status:   "INFO",
 		},
-		AuditID: uuid.New().String(),
+		AuditID:   uuid.New().String(),
+		UserAgent: "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
 	}
 	return &event, nil
 }

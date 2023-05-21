@@ -37,13 +37,13 @@ func processJSONData(jsonData map[string]interface{}) {
 
 	fmt.Println(event)
 
-	stopCh := make(chan struct{})
-	backend := NewBackend(stopCh)
-	events := EventList{
-		Items: []Event{*event},
-	}
-
-	backend.sendEvents(events)
+	//stopCh := make(chan struct{})
+	//backend := NewBackend(stopCh)
+	//events := EventList{
+	//	Items: []Event{*event},
+	//}
+	//
+	//backend.sendEvents(events)
 }
 
 func main() {
