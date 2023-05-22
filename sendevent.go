@@ -27,9 +27,9 @@ type Backend struct {
 	stopCh           <-chan struct{}
 }
 
-type MicroTime struct {
-	time.Time `protobuf:"-"`
-}
+//type MicroTime struct {
+//	time.Time `protobuf:"-"`
+//}
 
 type Event struct {
 	Devops                   string
@@ -49,8 +49,8 @@ type Event struct {
 	ResponseStatus           ResponseStatus
 	RequestObject            interface{}
 	ResponseObject           interface{}
-	RequestReceivedTimestamp MicroTime
-	StageTimestamp           MicroTime
+	RequestReceivedTimestamp string
+	StageTimestamp           string
 	Annotations              interface{}
 }
 
@@ -81,9 +81,9 @@ type EventList struct {
 	Items []Event
 }
 
-func NowMicro() MicroTime {
-	return MicroTime{time.Now()}
-}
+//func NowMicro() MicroTime {
+//	return MicroTime{time.Now()}
+//}
 
 func NewBackend(stopCh <-chan struct{}) *Backend {
 
@@ -187,8 +187,8 @@ func ProcessJSONData(jsonData []byte) {
 
 	parentUser := data["parentUser"].(string)
 
-	parsedTime, err := time.Parse(time.RFC3339, timeValue)
-	fmt.Println(err)
+	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
+	//fmt.Println(err)
 
 	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
 	for _, validName := range validNames {
@@ -209,7 +209,7 @@ func ProcessJSONData(jsonData []byte) {
 					groups: []string{"system:authenticated"},
 				},
 				ImpersonatedUser: nil,
-				SourceIPs:        []string{"10.233.103.183"},
+				SourceIPs:        []string{},
 				UserAgent:        "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
 				ObjectRef: ObjectRef{
 					Resource:        "MinIO",
@@ -230,8 +230,8 @@ func ProcessJSONData(jsonData []byte) {
 
 				RequestObject:            nil,
 				ResponseObject:           nil,
-				RequestReceivedTimestamp: MicroTime{parsedTime},
-				StageTimestamp:           MicroTime{parsedTime},
+				RequestReceivedTimestamp: timeValue,
+				StageTimestamp:           timeValue,
 				Annotations:              nil,
 			}
 			fmt.Println(event)
