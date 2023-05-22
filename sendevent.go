@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"k8s.io/klog"
 	"net/http"
 	"time"
@@ -183,101 +184,101 @@ func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
 	return bs, err
 }
 
-//func ProcessJSONData(jsonData []byte) {
-//	var data map[string]interface{}
-//	json.Unmarshal(jsonData, &data)
-//
-//	apiData := data["api"].(map[string]interface{})
-//	//if !ok {
-//	//	return nil, fmt.Errorf("api key not found or not a map[string]interface{}")
-//	//}
-//
-//	name := apiData["name"].(string)
-//	//if !ok {
-//	//	return nil, fmt.Errorf("name key not found or not a string")
-//	//}
-//
-//	//version := data["version"].(string)
-//	//if !ok {
-//	//	return nil, fmt.Errorf("version key not found or not a string")
-//	//}
-//
-//	//timeValue := data["time"].(string)
-//	//if !ok {
-//	//	return nil, fmt.Errorf("time key not found or not a string")
-//	//}
-//
-//	//parentUser := data["parentUser"].(string)
-//	//if !ok {
-//	//	return nil, fmt.Errorf("parentUser key not found or not a string")
-//	//}
-//
-//	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
-//	//if err != nil {
-//	//	return nil, fmt.Errorf("failed to parse time: %v", err)
-//	//}
-//
-//	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
-//	isValidName := false
-//	for _, validName := range validNames {
-//		if name == validName {
-//			isValidName = true
-//			break
-//		}
-//	}
-//
-//	if !isValidName {
-//		return
-//	}
-//
-//	event := Event{
-//		Devops:     "",
-//		Workspace:  "",
-//		Cluster:    "",
-//		Message:    "",
-//		Level:      "",
-//		AuditID:    "shiki2034-fc3b-46a5-1113-89066c3ad423",
-//		Stage:      "ResponseComplete",
-//		RequestURI: "",
-//		Verb:       "",
-//		User: User{
-//			username: "admin",
-//
-//			groups: []string{"system:authenticated"},
-//		},
-//		ImpersonatedUser: nil,
-//		SourceIPs:        []string{"10.233.103.183"},
-//		UserAgent:        "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
-//		ObjectRef: ObjectRef{
-//			Resource:        "MinIO",
-//			Namespace:       "",
-//			Name:            "PutObject",
-//			UID:             "",
-//			APIGroup:        "",
-//			APIVersion:      "",
-//			ResourceVersion: "",
-//			Subresource:     "",
-//		},
-//		ResponseStatus: ResponseStatus{
-//			Code:     200,
-//			Metadata: make(map[string]interface{}),
-//			reason:   "upload",
-//			status:   "INFO",
-//		},
-//
-//		RequestObject:            nil,
-//		ResponseObject:           nil,
-//		RequestReceivedTimestamp: "2023-05-17T03:32:47.394877Z",
-//		StageTimestamp:           "2023-05-17T03:32:47.394877Z",
-//		Annotations:              nil,
-//	}
-//	fmt.Println(event)
-//
-//	events := EventList{
-//		Items: []Event{event},
-//	}
-//	stopCh := make(chan struct{})
-//	backend := NewBackend(stopCh)
-//
-//	backend.sendEvents(events)
-//}
+func ProcessJSONData(jsonData []byte) {
+	var data map[string]interface{}
+	json.Unmarshal(jsonData, &data)
+
+	apiData := data["api"].(map[string]interface{})
+	//if !ok {
+	//	return nil, fmt.Errorf("api key not found or not a map[string]interface{}")
+	//}
+
+	name := apiData["name"].(string)
+	//if !ok {
+	//	return nil, fmt.Errorf("name key not found or not a string")
+	//}
+
+	version := data["version"].(string)
+	//if !ok {
+	//	return nil, fmt.Errorf("version key not found or not a string")
+	//}
+
+	//timeValue := data["time"].(string)
+	//if !ok {
+	//	return nil, fmt.Errorf("time key not found or not a string")
+	//}
+
+	//parentUser := data["parentUser"].(string)
+	//if !ok {
+	//	return nil, fmt.Errorf("parentUser key not found or not a string")
+	//}
+
+	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to parse time: %v", err)
+	//}
+
+	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
+	isValidName := false
+	for _, validName := range validNames {
+		if name == validName {
+			isValidName = true
+			break
+		}
+	}
+
+	if !isValidName {
+		return
+	}
+
+	event := Event{
+		Devops:     "",
+		Workspace:  "",
+		Cluster:    "",
+		Message:    "",
+		Level:      "",
+		AuditID:    uuid.New().String(),
+		Stage:      "ResponseComplete",
+		RequestURI: "",
+		Verb:       "",
+		User: User{
+			username: "admin",
+
+			groups: []string{"system:authenticated"},
+		},
+		ImpersonatedUser: nil,
+		SourceIPs:        []string{"10.233.103.183"},
+		UserAgent:        "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
+		ObjectRef: ObjectRef{
+			Resource:        "MinIO",
+			Namespace:       "",
+			Name:            name,
+			UID:             "",
+			APIGroup:        "",
+			APIVersion:      version,
+			ResourceVersion: "",
+			Subresource:     "",
+		},
+		ResponseStatus: ResponseStatus{
+			Code:     200,
+			Metadata: make(map[string]interface{}),
+			reason:   "upload",
+			status:   "INFO",
+		},
+
+		RequestObject:            nil,
+		ResponseObject:           nil,
+		RequestReceivedTimestamp: "2023-05-17T03:32:47.394877Z",
+		StageTimestamp:           "2023-05-17T03:32:47.394877Z",
+		Annotations:              nil,
+	}
+	fmt.Println(event)
+
+	//events := EventList{
+	//	Items: []Event{event},
+	//}
+	//stopCh := make(chan struct{})
+	//backend := NewBackend(stopCh)
+	//
+	//backend.sendEvents(events)
+}
