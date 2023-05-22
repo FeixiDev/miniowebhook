@@ -181,11 +181,23 @@ func ProcessJSONData(jsonData []byte) {
 
 	name := apiData["name"].(string)
 
+	bucket, ok := apiData["bucket"].(string)
+	if !ok {
+		bucket = ""
+	}
+
+	object, ok := apiData["object"].(string)
+	if !ok {
+		object = ""
+	}
+
 	version := data["version"].(string)
 
 	timeValue := data["time"].(string)
 
 	parentUser := data["parentUser"].(string)
+
+	userAgent := data["userAgent"].(string)
 
 	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
 	//fmt.Println(err)
@@ -200,17 +212,17 @@ func ProcessJSONData(jsonData []byte) {
 				Message:    "",
 				Level:      "",
 				AuditID:    uuid.New().String(),
-				Stage:      "ResponseComplete",
+				Stage:      "",
 				RequestURI: "",
 				Verb:       "",
 				User: User{
 					username: parentUser,
 
-					groups: []string{"system:authenticated"},
+					groups: []string{},
 				},
 				ImpersonatedUser: nil,
 				SourceIPs:        []string{},
-				UserAgent:        "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
+				UserAgent:        userAgent,
 				ObjectRef: ObjectRef{
 					Resource:        "MinIO",
 					Namespace:       "",
@@ -224,7 +236,6 @@ func ProcessJSONData(jsonData []byte) {
 				ResponseStatus: ResponseStatus{
 					Code:     200,
 					Metadata: make(map[string]interface{}),
-					reason:   "upload",
 					status:   "INFO",
 				},
 
@@ -233,6 +244,17 @@ func ProcessJSONData(jsonData []byte) {
 				RequestReceivedTimestamp: timeValue[:len(timeValue)-4] + timeValue[len(timeValue)-1:],
 				StageTimestamp:           timeValue[:len(timeValue)-4] + timeValue[len(timeValue)-1:],
 				Annotations:              nil,
+			}
+			if name == "PutObject" {
+				event.ResponseStatus.reason = "Upload" + object + "to the bucket" + bucket
+			} else if name == "DeleteMultipleObjects" {
+				event.ResponseStatus.reason = "Delete" + object + "from the bucket" + bucket
+			} else if name == "PutBucket" {
+				event.ResponseStatus.reason = "Create the bucket" + bucket
+			} else if name == "DeleteBucket" {
+				event.ResponseStatus.reason = "Delete the bucket" + bucket
+			} else if name == "SiteReplicationInfo" {
+				event.ResponseStatus.reason = "Login"
 			}
 			fmt.Println(event)
 
