@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -22,24 +21,24 @@ var (
 )
 
 func processJSONData(jsonData map[string]interface{}) {
-	// Convert jsonData to []byte
+
 	data, err := json.Marshal(jsonData)
 	if err != nil {
 		log.Println("Error marshaling jsonData:", err)
 		return
 	}
 
-	// Create a Backend instance
+	ProcessJSONData(data)
 
-	// Call ProcessJSONData function from sendevent.go
-	event, err := ProcessJSONData(data)
-	if err != nil {
-		log.Println("Error processing JSON data:", err)
-		return
-	}
+	//fmt.Println(event)
 
-	// Print the event
-	fmt.Println(event)
+	//stopCh := make(chan struct{})
+	//backend := NewBackend(stopCh)
+	//events := EventList{
+	//	Items: []Event{*event},
+	//}
+	//
+	//backend.sendEvents(events)
 }
 
 func main() {

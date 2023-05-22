@@ -6,10 +6,11 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"k8s.io/klog"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
+	"k8s.io/klog"
 )
 
 const (
@@ -49,8 +50,8 @@ type Event struct {
 	ResponseStatus           ResponseStatus
 	RequestObject            interface{}
 	ResponseObject           interface{}
-	RequestReceivedTimestamp MicroTime
-	StageTimestamp           MicroTime
+	RequestReceivedTimestamp string
+	StageTimestamp           string
 	Annotations              interface{}
 }
 
@@ -180,70 +181,76 @@ func (b *Backend) sendEvents(events EventList) {
 }
 
 func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
-
 	bs, err := json.Marshal(event)
 	return bs, err
 }
 
-func ProcessJSONData(jsonData []byte) (*Event, error) {
+func ProcessJSONData(jsonData []byte) (Event, error) {
 	var data map[string]interface{}
 	err := json.Unmarshal(jsonData, &data)
 	if err != nil {
-		return nil, err
+		return Event{}, err
 	}
 
 	apiData, ok := data["api"].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("api key not found or not a map[string]interface{}")
+		return Event{}, fmt.Errorf("api key not found or not a map[string]interface{}")
 	}
 
 	name, ok := apiData["name"].(string)
 	if !ok {
-		return nil, fmt.Errorf("name key not found or not a string")
+		return Event{}, fmt.Errorf("name key not found or not a string")
 	}
 
 	version, ok := data["version"].(string)
 	if !ok {
-		return nil, fmt.Errorf("version key not found or not a string")
+		return Event{}, fmt.Errorf("version key not found or not a string")
 	}
 
 	timeValue, ok := data["time"].(string)
 	if !ok {
-		return nil, fmt.Errorf("time key not found or not a string")
+		return Event{}, fmt.Errorf("time key not found or not a string")
 	}
 
 	parentUser, ok := data["parentUser"].(string)
 	if !ok {
-		return nil, fmt.Errorf("parentUser key not found or not a string")
+		return Event{}, fmt.Errorf("parentUser key not found or not a string")
 	}
 
+	// 解析 timeValue 为 time.Time 类型的值
 	parsedTime, err := time.Parse(time.RFC3339, timeValue)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse time: %v", err)
-	}
-
-	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
-	isValidName := false
-	for _, validName := range validNames {
-		if name == validName {
-			isValidName = true
-			break
-		}
-	}
-
-	if !isValidName {
-		return nil, nil // 当 name 不是有效值时，返回 nil 而不是错误
+		return Event{}, fmt.Errorf("failed to parse time: %v", err)
 	}
 
 	event := Event{
+		Devops:           "",
+		Workspace:        "",
+		Cluster:          "",
+		Message:          "",
+		Level:            "",
+		Stage:            "",
+		RequestURI:       "",
+		Verb:             "",
+		SourceIPs:        []string{"10.233.103.183"},
+		ImpersonatedUser: nil,
 		ObjectRef: ObjectRef{
-			Name:       name,
-			APIVersion: version,
+			Name:            name,
+			APIVersion:      version,
+			UID:             "",
+			APIGroup:        "",
+			Namespace:       "",
+			ResourceVersion: "",
+			Subresource:     "",
 		},
-		RequestReceivedTimestamp: MicroTime{parsedTime},
-		StageTimestamp:           MicroTime{parsedTime},
+		RequestObject:            nil,
+		ResponseObject:           nil,
+		Annotations:              nil,
+		RequestReceivedTimestamp: "2023-05-21T16:32:47.394877Z",
+		StageTimestamp:           "2023-05-21T16:32:47.394877Z",
 		User: User{
 			username: parentUser,
+			groups:   []string{"system:authenticated"},
 		},
 		ResponseStatus: ResponseStatus{
 			Code:     200,
@@ -251,7 +258,8 @@ func ProcessJSONData(jsonData []byte) (*Event, error) {
 			reason:   "",
 			status:   "INFO",
 		},
+		// 使用 uuid 包生成 AuditID
 		AuditID: uuid.New().String(),
 	}
-	return &event, nil
+	return event, nil
 }
