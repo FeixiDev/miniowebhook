@@ -183,11 +183,12 @@ func ProcessJSONData(jsonData []byte) {
 
 	version := data["version"].(string)
 
-	//timeValue := data["time"].(string)
+	timeValue := data["time"].(string)
 
 	parentUser := data["parentUser"].(string)
 
-	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
+	parsedTime, err := time.Parse(time.RFC3339, timeValue)
+	fmt.Println(err)
 
 	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
 	for _, validName := range validNames {
@@ -229,8 +230,8 @@ func ProcessJSONData(jsonData []byte) {
 
 				RequestObject:            nil,
 				ResponseObject:           nil,
-				RequestReceivedTimestamp: NowMicro(),
-				StageTimestamp:           NowMicro(),
+				RequestReceivedTimestamp: MicroTime{parsedTime},
+				StageTimestamp:           MicroTime{parsedTime},
 				Annotations:              nil,
 			}
 			fmt.Println(event)
