@@ -184,37 +184,37 @@ func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
 	return bs, err
 }
 
-func ProcessJSONData(jsonData []byte) (*Event, error) {
+func ProcessJSONData(jsonData []byte) *Event {
 	var data map[string]interface{}
 	err := json.Unmarshal(jsonData, &data)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	apiData, ok := data["api"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("api key not found or not a map[string]interface{}")
-	}
+	apiData := data["api"].(map[string]interface{})
+	//if !ok {
+	//	return nil, fmt.Errorf("api key not found or not a map[string]interface{}")
+	//}
 
-	name, ok := apiData["name"].(string)
-	if !ok {
-		return nil, fmt.Errorf("name key not found or not a string")
-	}
+	name := apiData["name"].(string)
+	//if !ok {
+	//	return nil, fmt.Errorf("name key not found or not a string")
+	//}
 
-	version, ok := data["version"].(string)
-	if !ok {
-		return nil, fmt.Errorf("version key not found or not a string")
-	}
+	version := data["version"].(string)
+	//if !ok {
+	//	return nil, fmt.Errorf("version key not found or not a string")
+	//}
 
-	//timeValue, ok := data["time"].(string)
+	//timeValue := data["time"].(string)
 	//if !ok {
 	//	return nil, fmt.Errorf("time key not found or not a string")
 	//}
 
-	parentUser, ok := data["parentUser"].(string)
-	if !ok {
-		return nil, fmt.Errorf("parentUser key not found or not a string")
-	}
+	parentUser := data["parentUser"].(string)
+	//if !ok {
+	//	return nil, fmt.Errorf("parentUser key not found or not a string")
+	//}
 
 	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
 	//if err != nil {
@@ -231,7 +231,7 @@ func ProcessJSONData(jsonData []byte) (*Event, error) {
 	}
 
 	if !isValidName {
-		return nil, nil // 当 name 不是有效值时，返回 nil 而不是错误
+		return nil
 	}
 
 	event := Event{
@@ -268,5 +268,5 @@ func ProcessJSONData(jsonData []byte) (*Event, error) {
 		AuditID:   uuid.New().String(),
 		UserAgent: "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
 	}
-	return &event, nil
+	return &event
 }
