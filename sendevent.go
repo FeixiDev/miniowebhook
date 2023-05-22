@@ -219,66 +219,59 @@ func ProcessJSONData(jsonData []byte) {
 	//}
 
 	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
-	isValidName := false
 	for _, validName := range validNames {
 		if name == validName {
-			isValidName = true
-			break
+			event := Event{
+				Devops:     "",
+				Workspace:  "",
+				Cluster:    "",
+				Message:    "",
+				Level:      "",
+				AuditID:    uuid.New().String(),
+				Stage:      "ResponseComplete",
+				RequestURI: "",
+				Verb:       "",
+				User: User{
+					username: "admin",
+
+					groups: []string{"system:authenticated"},
+				},
+				ImpersonatedUser: nil,
+				SourceIPs:        []string{"10.233.103.183"},
+				UserAgent:        "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
+				ObjectRef: ObjectRef{
+					Resource:        "MinIO",
+					Namespace:       "",
+					Name:            name,
+					UID:             "",
+					APIGroup:        "",
+					APIVersion:      version,
+					ResourceVersion: "",
+					Subresource:     "",
+				},
+				ResponseStatus: ResponseStatus{
+					Code:     200,
+					Metadata: make(map[string]interface{}),
+					reason:   "upload",
+					status:   "INFO",
+				},
+
+				RequestObject:            nil,
+				ResponseObject:           nil,
+				RequestReceivedTimestamp: "2023-05-17T03:32:47.394877Z",
+				StageTimestamp:           "2023-05-17T03:32:47.394877Z",
+				Annotations:              nil,
+			}
+			fmt.Println(event)
+
+			//events := EventList{
+			//	Items: []Event{event},
+			//}
+			//stopCh := make(chan struct{})
+			//backend := NewBackend(stopCh)
+			//
+			//backend.sendEvents(events)
 		}
 	}
 
-	if !isValidName {
-		return
-	}
-
-	event := Event{
-		Devops:     "",
-		Workspace:  "",
-		Cluster:    "",
-		Message:    "",
-		Level:      "",
-		AuditID:    uuid.New().String(),
-		Stage:      "ResponseComplete",
-		RequestURI: "",
-		Verb:       "",
-		User: User{
-			username: "admin",
-
-			groups: []string{"system:authenticated"},
-		},
-		ImpersonatedUser: nil,
-		SourceIPs:        []string{"10.233.103.183"},
-		UserAgent:        "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
-		ObjectRef: ObjectRef{
-			Resource:        "MinIO",
-			Namespace:       "",
-			Name:            name,
-			UID:             "",
-			APIGroup:        "",
-			APIVersion:      version,
-			ResourceVersion: "",
-			Subresource:     "",
-		},
-		ResponseStatus: ResponseStatus{
-			Code:     200,
-			Metadata: make(map[string]interface{}),
-			reason:   "upload",
-			status:   "INFO",
-		},
-
-		RequestObject:            nil,
-		ResponseObject:           nil,
-		RequestReceivedTimestamp: "2023-05-17T03:32:47.394877Z",
-		StageTimestamp:           "2023-05-17T03:32:47.394877Z",
-		Annotations:              nil,
-	}
-	fmt.Println(event)
-
-	//events := EventList{
-	//	Items: []Event{event},
-	//}
-	//stopCh := make(chan struct{})
-	//backend := NewBackend(stopCh)
-	//
-	//backend.sendEvents(events)
 }
