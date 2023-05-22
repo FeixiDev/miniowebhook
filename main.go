@@ -28,16 +28,6 @@ func processJSONData(jsonData map[string]interface{}) {
 	}
 
 	ProcessJSONData(data)
-
-	//fmt.Println(event)
-
-	//stopCh := make(chan struct{})
-	//backend := NewBackend(stopCh)
-	//events := EventList{
-	//	Items: []Event{*event},
-	//}
-	//
-	//backend.sendEvents(events)
 }
 
 func main() {

@@ -105,19 +105,8 @@ func NewBackend(stopCh <-chan struct{}) *Backend {
 	}
 
 	fmt.Println("ended NewBackend.......")
-	go b.worker()
 
 	return &b
-}
-
-func (b *Backend) worker() {
-	fmt.Println("start b worker.......")
-
-	for {
-		events := EventList{}
-
-		go b.sendEvents(events)
-	}
 }
 
 func (b *Backend) sendEvents(events EventList) {
@@ -189,34 +178,16 @@ func ProcessJSONData(jsonData []byte) {
 	json.Unmarshal(jsonData, &data)
 
 	apiData := data["api"].(map[string]interface{})
-	//if !ok {
-	//	return nil, fmt.Errorf("api key not found or not a map[string]interface{}")
-	//}
 
 	name := apiData["name"].(string)
-	//if !ok {
-	//	return nil, fmt.Errorf("name key not found or not a string")
-	//}
 
 	version := data["version"].(string)
-	//if !ok {
-	//	return nil, fmt.Errorf("version key not found or not a string")
-	//}
 
 	//timeValue := data["time"].(string)
-	//if !ok {
-	//	return nil, fmt.Errorf("time key not found or not a string")
-	//}
 
-	//parentUser := data["parentUser"].(string)
-	//if !ok {
-	//	return nil, fmt.Errorf("parentUser key not found or not a string")
-	//}
+	parentUser := data["parentUser"].(string)
 
 	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
-	//if err != nil {
-	//	return nil, fmt.Errorf("failed to parse time: %v", err)
-	//}
 
 	validNames := []string{"PutObject", "DeleteMultipleObjects", "PutBucket", "DeleteBucket", "SiteReplicationInfo"}
 	for _, validName := range validNames {
@@ -232,7 +203,7 @@ func ProcessJSONData(jsonData []byte) {
 				RequestURI: "",
 				Verb:       "",
 				User: User{
-					username: "admin",
+					username: parentUser,
 
 					groups: []string{"system:authenticated"},
 				},
@@ -264,13 +235,13 @@ func ProcessJSONData(jsonData []byte) {
 			}
 			fmt.Println(event)
 
-			//events := EventList{
-			//	Items: []Event{event},
-			//}
-			//stopCh := make(chan struct{})
-			//backend := NewBackend(stopCh)
-			//
-			//backend.sendEvents(events)
+			events := EventList{
+				Items: []Event{event},
+			}
+			stopCh := make(chan struct{})
+			backend := NewBackend(stopCh)
+
+			backend.sendEvents(events)
 		}
 	}
 
