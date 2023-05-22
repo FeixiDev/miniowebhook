@@ -184,12 +184,9 @@ func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
 	return bs, err
 }
 
-func ProcessJSONData(jsonData []byte) *Event {
+func ProcessJSONData(jsonData []byte) {
 	var data map[string]interface{}
-	err := json.Unmarshal(jsonData, &data)
-	if err != nil {
-		return nil
-	}
+	json.Unmarshal(jsonData, &data)
 
 	apiData := data["api"].(map[string]interface{})
 	//if !ok {
@@ -231,7 +228,7 @@ func ProcessJSONData(jsonData []byte) *Event {
 	}
 
 	if !isValidName {
-		return nil
+		return
 	}
 
 	event := Event{
@@ -268,5 +265,13 @@ func ProcessJSONData(jsonData []byte) *Event {
 		AuditID:   uuid.New().String(),
 		UserAgent: "MinIO (linux; amd64) minio-go/v7.0.52 MinIO Console/(dev)",
 	}
-	return &event
+	fmt.Println(event)
+
+	//stopCh := make(chan struct{})
+	//backend := NewBackend(stopCh)
+	//events := EventList{
+	//	Items: []Event{event},
+	//}
+	//
+	//backend.sendEvents(events)
 }

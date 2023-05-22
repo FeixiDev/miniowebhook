@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -29,13 +28,9 @@ func processJSONData(jsonData map[string]interface{}) {
 		return
 	}
 
-	event, err := ProcessJSONData(data)
-	if err != nil {
-		log.Println("Error processing JSON data:", err)
-		return
-	}
+	ProcessJSONData(data)
 
-	fmt.Println(event)
+	//fmt.Println(event)
 
 	//stopCh := make(chan struct{})
 	//backend := NewBackend(stopCh)
