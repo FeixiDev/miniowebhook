@@ -230,8 +230,8 @@ func ProcessJSONData(jsonData []byte) {
 
 				RequestObject:            nil,
 				ResponseObject:           nil,
-				RequestReceivedTimestamp: timeValue,
-				StageTimestamp:           timeValue,
+				RequestReceivedTimestamp: timeValue[:len(timeValue)-4] + timeValue[len(timeValue)-1:],
+				StageTimestamp:           timeValue[:len(timeValue)-4] + timeValue[len(timeValue)-1:],
 				Annotations:              nil,
 			}
 			fmt.Println(event)
