@@ -232,15 +232,16 @@ func ProcessJSONData(jsonData []byte) {
 	}
 
 	event := Event{
-		Devops:     "",
-		Workspace:  "",
-		Cluster:    "",
-		Message:    "",
-		Level:      "",
-		Stage:      "",
-		RequestURI: "",
-		Verb:       "",
-		SourceIPs:  []string{"10.233.103.183"},
+		Devops:           "",
+		Workspace:        "",
+		Cluster:          "",
+		Message:          "",
+		Level:            "",
+		Stage:            "",
+		RequestURI:       "",
+		Verb:             "",
+		SourceIPs:        []string{"10.233.103.183"},
+		ImpersonatedUser: nil,
 		ObjectRef: ObjectRef{
 			Name:            name,
 			APIVersion:      version,
@@ -250,6 +251,9 @@ func ProcessJSONData(jsonData []byte) {
 			ResourceVersion: "",
 			Subresource:     "",
 		},
+		RequestObject:            nil,
+		ResponseObject:           nil,
+		Annotations:              nil,
 		RequestReceivedTimestamp: "2023-05-21T16:32:47.394877Z",
 		StageTimestamp:           "2023-05-21T16:32:47.394877Z",
 		User: User{
@@ -267,11 +271,11 @@ func ProcessJSONData(jsonData []byte) {
 	}
 	fmt.Println(event)
 
-	//stopCh := make(chan struct{})
-	//backend := NewBackend(stopCh)
-	//events := EventList{
-	//	Items: []Event{event},
-	//}
-	//
-	//backend.sendEvents(events)
+	events := EventList{
+		Items: []Event{event},
+	}
+	stopCh := make(chan struct{})
+	backend := NewBackend(stopCh)
+
+	backend.sendEvents(events)
 }
