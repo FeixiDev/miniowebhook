@@ -49,8 +49,8 @@ type Event struct {
 	ResponseStatus           ResponseStatus
 	RequestObject            interface{}
 	ResponseObject           interface{}
-	RequestReceivedTimestamp string
-	StageTimestamp           string
+	RequestReceivedTimestamp MicroTime
+	StageTimestamp           MicroTime
 	Annotations              interface{}
 }
 
@@ -81,9 +81,9 @@ type EventList struct {
 	Items []Event
 }
 
-//func NowMicro() MicroTime {
-//	return MicroTime{time.Now()}
-//}
+func NowMicro() MicroTime {
+	return MicroTime{time.Now()}
+}
 
 func NewBackend(stopCh <-chan struct{}) *Backend {
 
@@ -229,8 +229,8 @@ func ProcessJSONData(jsonData []byte) {
 
 				RequestObject:            nil,
 				ResponseObject:           nil,
-				RequestReceivedTimestamp: "2023-05-17T03:32:47.394877Z",
-				StageTimestamp:           "2023-05-17T03:32:47.394877Z",
+				RequestReceivedTimestamp: NowMicro(),
+				StageTimestamp:           NowMicro(),
 				Annotations:              nil,
 			}
 			fmt.Println(event)
