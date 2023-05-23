@@ -187,12 +187,17 @@ func ProcessJSONData(jsonData []byte, sip string) {
 		fmt.Println("Error getting IP address:", err)
 		return
 	}
+	fmt.Println(addrs)
 
 	var ip string
-	for _, addr := range addrs {
+	for i, addr := range addrs {
 		if ipv4 := addr.To4(); ipv4 != nil {
-			ip = ipv4.String()
-			break
+			if i == 0 {
+				ip = ipv4.String()
+			} else {
+				ip = ipv4.String()
+				break
+			}
 		}
 	}
 	var data map[string]interface{}
