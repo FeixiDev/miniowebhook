@@ -272,13 +272,13 @@ func ProcessJSONData(jsonData []byte, sip string) {
 				Annotations:              nil,
 			}
 			if name == "PutObject" {
-				event.ResponseStatus.Reason = "Upload" + object + "to the bucket" + bucket
+				event.ResponseStatus.Reason = "Upload" + " " + object + " " + "to the bucket" + " " + bucket
 			} else if name == "DeleteMultipleObjects" {
-				event.ResponseStatus.Reason = "Delete" + object + "from the bucket" + bucket
+				event.ResponseStatus.Reason = "Delete" + " " + object + " " + "from the bucket" + " " + bucket
 			} else if name == "PutBucket" {
-				event.ResponseStatus.Reason = "Create the bucket" + bucket
+				event.ResponseStatus.Reason = "Create the bucket" + " " + bucket
 			} else if name == "DeleteBucket" {
-				event.ResponseStatus.Reason = "Delete the bucket" + bucket
+				event.ResponseStatus.Reason = "Delete the bucket" + " " + bucket
 			} else if name == "SiteReplicationInfo" {
 				event.ResponseStatus.Reason = "Login"
 			}
