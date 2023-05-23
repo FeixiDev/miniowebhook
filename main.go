@@ -6,6 +6,7 @@ import (
 	"github.com/minio/pkg/env"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,7 +15,7 @@ import (
 )
 
 var (
-	logFile   string
+	//logFile   string
 	address   string
 	authToken = env.Get("WEBHOOK_AUTH_TOKEN", "")
 )
@@ -31,9 +32,9 @@ func processJSONData(jsonData map[string]interface{}, ip string) {
 }
 
 func main() {
-	flag.StringVar(&logFile, "log-file", "", "path to the file where webhook will log incoming events")
+	//flag.StringVar(&logFile, "log-file", "", "path to the file where webhook will log incoming events")
 	flag.StringVar(&address, "address", ":8080", "bind to a specific ADDRESS:PORT, ADDRESS can be an IP or hostname")
-
+	//
 	flag.Parse()
 
 	var mu sync.Mutex
@@ -59,7 +60,7 @@ func main() {
 		case http.MethodPost:
 			mu.Lock()
 			data, err := ioutil.ReadAll(r.Body)
-			ipAddress := r.RemoteAddr
+			ipAddress, _, err := net.SplitHostPort(r.RemoteAddr)
 			if err != nil {
 				mu.Unlock()
 				return
