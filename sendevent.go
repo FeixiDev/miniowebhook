@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"k8s.io/klog"
+	"net"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -55,8 +57,8 @@ type Event struct {
 }
 
 type User struct {
-	username string
-	groups   []string
+	Username string
+	Groups   []string
 }
 
 type ObjectRef struct {
@@ -174,6 +176,25 @@ func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
 }
 
 func ProcessJSONData(jsonData []byte) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		fmt.Println("Error getting hostname:", err)
+		return
+	}
+
+	addrs, err := net.LookupIP(hostname)
+	if err != nil {
+		fmt.Println("Error getting IP address:", err)
+		return
+	}
+
+	var ip string
+	for _, addr := range addrs {
+		if ipv4 := addr.To4(); ipv4 != nil {
+			ip = ipv4.String()
+			break
+		}
+	}
 	var data map[string]interface{}
 	json.Unmarshal(jsonData, &data)
 
@@ -207,7 +228,7 @@ func ProcessJSONData(jsonData []byte) {
 		if name == validName {
 			event := Event{
 				Devops:     "",
-				Workspace:  "",
+				Workspace:  hostname + "(" + ip + ")",
 				Cluster:    "",
 				Message:    "",
 				Level:      "",
@@ -216,9 +237,9 @@ func ProcessJSONData(jsonData []byte) {
 				RequestURI: "",
 				Verb:       "",
 				User: User{
-					username: parentUser,
+					Username: parentUser,
 
-					groups: []string{},
+					Groups: []string{},
 				},
 				ImpersonatedUser: nil,
 				SourceIPs:        []string{},
