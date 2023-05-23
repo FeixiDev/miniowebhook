@@ -217,12 +217,24 @@ func ProcessJSONData(jsonData []byte, sip string) {
 	}
 
 	version := data["version"].(string)
+	if !ok {
+		version = ""
+	}
 
 	timeValue := data["time"].(string)
+	if !ok {
+		timeValue = ""
+	}
 
 	parentUser := data["parentUser"].(string)
+	if !ok {
+		parentUser = ""
+	}
 
 	userAgent := data["userAgent"].(string)
+	if !ok {
+		userAgent = ""
+	}
 
 	//parsedTime, err := time.Parse(time.RFC3339, timeValue)
 	//fmt.Println(err)
