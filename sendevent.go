@@ -75,8 +75,8 @@ type ObjectRef struct {
 type ResponseStatus struct {
 	Code     int
 	Metadata map[string]interface{}
-	reason   string
-	status   string
+	Reason   string
+	Status   string
 }
 
 type EventList struct {
@@ -175,7 +175,7 @@ func (b *Backend) eventToBytes(event EventList) ([]byte, error) {
 	return bs, err
 }
 
-func ProcessJSONData(jsonData []byte) {
+func ProcessJSONData(jsonData []byte, sip string) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		fmt.Println("Error getting hostname:", err)
@@ -242,7 +242,7 @@ func ProcessJSONData(jsonData []byte) {
 					Groups: []string{},
 				},
 				ImpersonatedUser: nil,
-				SourceIPs:        []string{},
+				SourceIPs:        []string{sip},
 				UserAgent:        userAgent,
 				ObjectRef: ObjectRef{
 					Resource:        "MinIO",
@@ -257,7 +257,7 @@ func ProcessJSONData(jsonData []byte) {
 				ResponseStatus: ResponseStatus{
 					Code:     200,
 					Metadata: make(map[string]interface{}),
-					status:   "INFO",
+					Status:   "INFO",
 				},
 
 				RequestObject:            nil,
@@ -267,15 +267,15 @@ func ProcessJSONData(jsonData []byte) {
 				Annotations:              nil,
 			}
 			if name == "PutObject" {
-				event.ResponseStatus.reason = "Upload" + object + "to the bucket" + bucket
+				event.ResponseStatus.Reason = "Upload" + object + "to the bucket" + bucket
 			} else if name == "DeleteMultipleObjects" {
-				event.ResponseStatus.reason = "Delete" + object + "from the bucket" + bucket
+				event.ResponseStatus.Reason = "Delete" + object + "from the bucket" + bucket
 			} else if name == "PutBucket" {
-				event.ResponseStatus.reason = "Create the bucket" + bucket
+				event.ResponseStatus.Reason = "Create the bucket" + bucket
 			} else if name == "DeleteBucket" {
-				event.ResponseStatus.reason = "Delete the bucket" + bucket
+				event.ResponseStatus.Reason = "Delete the bucket" + bucket
 			} else if name == "SiteReplicationInfo" {
-				event.ResponseStatus.reason = "Login"
+				event.ResponseStatus.Reason = "Login"
 			}
 			fmt.Println(event)
 

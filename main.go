@@ -19,7 +19,7 @@ var (
 	authToken = env.Get("WEBHOOK_AUTH_TOKEN", "")
 )
 
-func processJSONData(jsonData map[string]interface{}) {
+func processJSONData(jsonData map[string]interface{}, ip string) {
 
 	data, err := json.Marshal(jsonData)
 	if err != nil {
@@ -27,7 +27,7 @@ func processJSONData(jsonData map[string]interface{}) {
 		return
 	}
 
-	ProcessJSONData(data)
+	ProcessJSONData(data, ip)
 }
 
 func main() {
@@ -59,6 +59,7 @@ func main() {
 		case http.MethodPost:
 			mu.Lock()
 			data, err := ioutil.ReadAll(r.Body)
+			ipAddress := r.RemoteAddr
 			if err != nil {
 				mu.Unlock()
 				return
@@ -71,7 +72,7 @@ func main() {
 				return
 			}
 
-			processJSONData(jsonData)
+			processJSONData(jsonData, ipAddress)
 
 			mu.Unlock()
 		default:
