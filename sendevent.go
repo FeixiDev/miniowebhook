@@ -187,7 +187,6 @@ func ProcessJSONData(jsonData []byte, sip string) {
 		fmt.Println("Error getting IP address:", err)
 		return
 	}
-	fmt.Println(addrs)
 
 	var ip string
 	for i, addr := range addrs {
@@ -272,15 +271,15 @@ func ProcessJSONData(jsonData []byte, sip string) {
 				Annotations:              nil,
 			}
 			if name == "PutObject" {
-				event.ResponseStatus.Reason = "Upload" + " " + object + " " + "to the bucket" + " " + bucket
+				event.ResponseStatus.Reason = "上传" + object + "到bucket" + "(" + bucket + ")"
 			} else if name == "DeleteMultipleObjects" {
-				event.ResponseStatus.Reason = "Delete" + " " + object + " " + "from the bucket" + " " + bucket
+				event.ResponseStatus.Reason = "从bucket(" + bucket + " )" + "删除" + object
 			} else if name == "PutBucket" {
-				event.ResponseStatus.Reason = "Create the bucket" + " " + bucket
+				event.ResponseStatus.Reason = "创建bucket" + " " + bucket
 			} else if name == "DeleteBucket" {
-				event.ResponseStatus.Reason = "Delete the bucket" + " " + bucket
+				event.ResponseStatus.Reason = "删除bucket" + " " + bucket
 			} else if name == "SiteReplicationInfo" {
-				event.ResponseStatus.Reason = "Login"
+				event.ResponseStatus.Reason = "登录"
 			}
 			fmt.Println(event)
 
