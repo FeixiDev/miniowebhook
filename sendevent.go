@@ -216,22 +216,22 @@ func ProcessJSONData(jsonData []byte, sip string) {
 		object = ""
 	}
 
-	version := data["version"].(string)
+	version, ok := data["version"].(string)
 	if !ok {
 		version = ""
 	}
 
-	timeValue := data["time"].(string)
+	timeValue, ok := data["time"].(string)
 	if !ok {
 		timeValue = ""
 	}
 
-	parentUser := data["parentUser"].(string)
+	parentUser, ok := data["parentUser"].(string)
 	if !ok {
 		parentUser = ""
 	}
 
-	userAgent := data["userAgent"].(string)
+	userAgent, ok := data["userAgent"].(string)
 	if !ok {
 		userAgent = ""
 	}
