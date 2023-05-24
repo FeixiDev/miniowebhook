@@ -202,9 +202,15 @@ func ProcessJSONData(jsonData []byte, sip string) {
 	var data map[string]interface{}
 	json.Unmarshal(jsonData, &data)
 
-	apiData := data["api"].(map[string]interface{})
+	apiData, ok := data["api"].(map[string]interface{})
+	if !ok {
+		apiData = make(map[string]interface{})
+	}
 
-	name := apiData["name"].(string)
+	name, ok := apiData["name"].(string)
+	if !ok {
+		name = ""
+	}
 
 	bucket, ok := apiData["bucket"].(string)
 	if !ok {
