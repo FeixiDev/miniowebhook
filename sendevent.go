@@ -17,7 +17,7 @@ import (
 const (
 	GetSenderTimeout = time.Second
 	SendTimeout      = time.Second * 3
-	WebhookURL       = "https://10.203.1.23:30278/audit/webhook/event"
+	WebhookURL       = "https://kube-auditing-webhook-svc.kubesphere-logging-system.svc:6443/audit/webhook/event"
 )
 
 type Backend struct {
@@ -298,6 +298,7 @@ func ProcessJSONData(jsonData []byte, sip string) {
 				event.ResponseStatus.Reason = "删除bucket" + " " + bucket
 			} else if name == "SiteReplicationInfo" {
 				event.ResponseStatus.Reason = "登录"
+				event.ObjectRef.Name = "Login"
 			}
 			fmt.Println(event)
 
